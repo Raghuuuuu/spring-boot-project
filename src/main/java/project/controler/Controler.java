@@ -17,6 +17,7 @@ import project.entity.User;
 import project.model.UserDTO;
 import project.repo.UserRepo;
 import project.service.AIService;
+import project.service.OtpService;
 
 @RestController
 //@RequestMapping("project/")
@@ -27,6 +28,9 @@ public class Controler {
 
 	@Autowired
 	AIService aIService;
+	
+	@Autowired
+	OtpService otpService;
 
 	@PostMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Decrypt encrypted text")
@@ -43,8 +47,15 @@ public class Controler {
 		ResponseEntity<String> response = null;
 
 		try {
-			String output = aIService.getAiResponse(decryptionRequest);
-			return ResponseEntity.ok(output);
+//			String output = aIService.getAiResponse(decryptionRequest);
+			if(decryptionRequest.getName().isEmpty()) {
+				String otp = otpService.generateOtp(decryptionRequest.getEmail());
+				return ResponseEntity.ok(otp);
+			}else {
+				boolean value = otpService.validateOtp(decryptionRequest.getEmail(),decryptionRequest.getName());
+				return ResponseEntity.ok(String.valueOf(value));
+			}
+//			return ResponseEntity.ok(output);
 		} catch (Exception e) {
 			throw e;
 		}
